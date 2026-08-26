@@ -1,0 +1,10 @@
+services:
+  docs:
+    build:
+      context: ./docs
+    environment:
+      PAGES_REPO_NWO: saadjs/octobase
+    ports:
+      - "${DOCS_PORT:-4000}:4000"
+    volumes:
+      - ./docs:/site:ro

@@ -1,0 +1,5 @@
+title: Octobase
+description: Replacement for the GitHub homepage.
+defaults:
+  - scope: { path: "" }
+    values: { layout: default }

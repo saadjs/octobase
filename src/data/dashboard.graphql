@@ -1,0 +1,586 @@
+query Dashboard(
+  $reviewRequestsCursor: String
+  $assignedIssuesCursor: String
+  $ownedPullRequestsCursor: String
+  $ownedIssuesCursor: String
+  $contributedPullRequestsCursor: String
+  $contributedIssuesCursor: String
+  $mentionedCursor: String
+  $authoredPullRequestsCursor: String
+  $participatingCursor: String
+  $changesRequestedCursor: String
+  $failingChecksCursor: String
+  $incomingPullRequestsCursor: String
+) {
+  # Free to select; lets us measure real query cost and back off before GitHub does.
+  rateLimit {
+    cost
+    nodeCount
+    remaining
+    resetAt
+  }
+  viewer {
+    login
+    name
+    avatarUrl
+  }
+  reviewRequests: search(
+    query: "is:open is:pr review-requested:@me sort:updated-desc"
+    type: ISSUE
+    first: 20
+    after: $reviewRequestsCursor
+  ) {
+    issueCount
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    nodes {
+      ...PullRequestCard
+    }
+  }
+  assignedIssues: search(
+    query: "is:open is:issue assignee:@me sort:updated-desc"
+    type: ISSUE
+    first: 20
+    after: $assignedIssuesCursor
+  ) {
+    issueCount
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    nodes {
+      ...IssueCard
+    }
+  }
+  ownedPullRequests: search(
+    query: "is:open is:pr author:@me user:@me sort:updated-desc"
+    type: ISSUE
+    first: 20
+    after: $ownedPullRequestsCursor
+  ) {
+    issueCount
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    nodes {
+      ...PullRequestCard
+    }
+  }
+  ownedIssues: search(
+    query: "is:open is:issue author:@me user:@me sort:updated-desc"
+    type: ISSUE
+    first: 20
+    after: $ownedIssuesCursor
+  ) {
+    issueCount
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    nodes {
+      ...IssueCard
+    }
+  }
+  contributedPullRequests: search(
+    query: "is:open is:pr author:@me -user:@me sort:updated-desc"
+    type: ISSUE
+    first: 20
+    after: $contributedPullRequestsCursor
+  ) {
+    issueCount
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    nodes {
+      ...PullRequestCard
+    }
+  }
+  contributedIssues: search(
+    query: "is:open is:issue author:@me -user:@me sort:updated-desc"
+    type: ISSUE
+    first: 20
+    after: $contributedIssuesCursor
+  ) {
+    issueCount
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    nodes {
+      ...IssueCard
+    }
+  }
+  mentioned: search(
+    query: "is:open mentions:@me sort:updated-desc"
+    type: ISSUE
+    first: 20
+    after: $mentionedCursor
+  ) {
+    issueCount
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    nodes {
+      ...PullRequestCard
+      ...IssueCard
+    }
+  }
+  authoredPullRequests: search(
+    query: "is:open is:pr author:@me sort:updated-desc"
+    type: ISSUE
+    first: 20
+    after: $authoredPullRequestsCursor
+  ) {
+    issueCount
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    nodes {
+      ...PullRequestCard
+    }
+  }
+  changesRequested: search(
+    query: "is:open is:pr author:@me review:changes_requested sort:updated-desc"
+    type: ISSUE
+    first: 20
+    after: $changesRequestedCursor
+  ) {
+    issueCount
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    nodes {
+      ...PullRequestCard
+    }
+  }
+  failingChecks: search(
+    query: "is:open is:pr author:@me status:failure sort:updated-desc"
+    type: ISSUE
+    first: 20
+    after: $failingChecksCursor
+  ) {
+    issueCount
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    nodes {
+      ...PullRequestCard
+    }
+  }
+  participating: search(
+    query: "is:open commenter:@me sort:updated-desc"
+    type: ISSUE
+    first: 20
+    after: $participatingCursor
+  ) {
+    issueCount
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    nodes {
+      ...PullRequestCard
+      ...IssueCard
+    }
+  }
+  incomingPullRequests: search(
+    query: "is:open is:pr -author:@me user:@me sort:updated-desc"
+    type: ISSUE
+    first: 20
+    after: $incomingPullRequestsCursor
+  ) {
+    issueCount
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    nodes {
+      ...PullRequestCard
+    }
+  }
+}
+
+query DashboardAttention {
+  rateLimit {
+    cost
+    nodeCount
+    remaining
+    resetAt
+  }
+  viewer {
+    login
+    name
+    avatarUrl
+  }
+  reviewRequests: search(
+    query: "is:open is:pr review-requested:@me sort:updated-desc"
+    type: ISSUE
+    first: 20
+  ) {
+    ...SearchPullRequest
+  }
+  assignedIssues: search(
+    query: "is:open is:issue assignee:@me sort:updated-desc"
+    type: ISSUE
+    first: 20
+  ) {
+    ...SearchIssue
+  }
+  mentioned: search(query: "is:open mentions:@me sort:updated-desc", type: ISSUE, first: 20) {
+    ...SearchCard
+  }
+  authoredPullRequests: search(
+    query: "is:open is:pr author:@me sort:updated-desc"
+    type: ISSUE
+    first: 20
+  ) {
+    ...SearchPullRequest
+  }
+  changesRequested: search(
+    query: "is:open is:pr author:@me review:changes_requested sort:updated-desc"
+    type: ISSUE
+    first: 20
+  ) {
+    ...SearchPullRequest
+  }
+  failingChecks: search(
+    query: "is:open is:pr author:@me status:failure sort:updated-desc"
+    type: ISSUE
+    first: 20
+  ) {
+    ...SearchPullRequest
+  }
+  participating: search(query: "is:open commenter:@me sort:updated-desc", type: ISSUE, first: 20) {
+    ...SearchCard
+  }
+  # Pull requests other people opened on repositories this account owns. Nobody asked the
+  # viewer for these, so nothing else in the dashboard surfaces them.
+  incomingPullRequests: search(
+    query: "is:open is:pr -author:@me user:@me sort:updated-desc"
+    type: ISSUE
+    first: 20
+  ) {
+    ...SearchPullRequest
+  }
+}
+
+query DashboardOwned {
+  rateLimit {
+    cost
+    nodeCount
+    remaining
+    resetAt
+  }
+  viewer {
+    login
+  }
+  ownedPullRequests: search(
+    query: "is:open is:pr author:@me user:@me sort:updated-desc"
+    type: ISSUE
+    first: 20
+  ) {
+    ...SearchPullRequest
+  }
+  ownedIssues: search(
+    query: "is:open is:issue author:@me user:@me sort:updated-desc"
+    type: ISSUE
+    first: 20
+  ) {
+    ...SearchIssue
+  }
+}
+
+query DashboardContributions {
+  rateLimit {
+    cost
+    nodeCount
+    remaining
+    resetAt
+  }
+  viewer {
+    login
+  }
+  contributedPullRequests: search(
+    query: "is:open is:pr author:@me -user:@me sort:updated-desc"
+    type: ISSUE
+    first: 20
+  ) {
+    ...SearchPullRequest
+  }
+  contributedIssues: search(
+    query: "is:open is:issue author:@me -user:@me sort:updated-desc"
+    type: ISSUE
+    first: 20
+  ) {
+    ...SearchIssue
+  }
+}
+
+fragment SearchPullRequest on SearchResultItemConnection {
+  issueCount
+  pageInfo {
+    hasNextPage
+    endCursor
+  }
+  nodes {
+    ...PullRequestCard
+  }
+}
+
+fragment SearchIssue on SearchResultItemConnection {
+  issueCount
+  pageInfo {
+    hasNextPage
+    endCursor
+  }
+  nodes {
+    ...IssueCard
+  }
+}
+
+fragment SearchCard on SearchResultItemConnection {
+  issueCount
+  pageInfo {
+    hasNextPage
+    endCursor
+  }
+  nodes {
+    ...PullRequestCard
+    ...IssueCard
+  }
+}
+
+# Cursor expansion must only select the requested connection. The monolithic Dashboard
+# operation would otherwise reload every other section's first page on each cursor request.
+query DashboardSectionPage($query: String!, $cursor: String) {
+  rateLimit {
+    cost
+    nodeCount
+    remaining
+    resetAt
+  }
+  viewer {
+    login
+  }
+  page: search(query: $query, type: ISSUE, first: 20, after: $cursor) {
+    issueCount
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    nodes {
+      ...PullRequestCard
+      ...IssueCard
+    }
+  }
+}
+
+fragment PullRequestCard on PullRequest {
+  __typename
+  id
+  number
+  title
+  url
+  createdAt
+  updatedAt
+  isDraft
+  mergeable
+  mergeStateStatus
+  reviewDecision
+  author {
+    login
+  }
+  repository {
+    nameWithOwner
+    url
+  }
+  comments(last: 1) {
+    totalCount
+    nodes {
+      author {
+        login
+      }
+      createdAt
+    }
+  }
+  reviews(last: 1) {
+    nodes {
+      author {
+        login
+      }
+      createdAt
+    }
+  }
+  statusCheckRollup {
+    state
+  }
+  reactionGroups {
+    content
+    reactors {
+      totalCount
+    }
+    viewerHasReacted
+  }
+  changesRequestedReviews: reviews(last: 1, states: [CHANGES_REQUESTED]) {
+    nodes {
+      author {
+        login
+      }
+      createdAt
+    }
+  }
+  reviewRequestedEvents: timelineItems(last: 10, itemTypes: [REVIEW_REQUESTED_EVENT]) {
+    nodes {
+      ... on ReviewRequestedEvent {
+        createdAt
+        requestedReviewer {
+          ... on User {
+            login
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment IssueCard on Issue {
+  __typename
+  id
+  number
+  title
+  url
+  createdAt
+  updatedAt
+  author {
+    login
+  }
+  repository {
+    nameWithOwner
+    url
+  }
+  comments(last: 1) {
+    totalCount
+    nodes {
+      author {
+        login
+      }
+      createdAt
+    }
+  }
+  labels(first: 5) {
+    nodes {
+      name
+      color
+    }
+  }
+  reactionGroups {
+    content
+    reactors {
+      totalCount
+    }
+    viewerHasReacted
+  }
+  assignedEvents: timelineItems(last: 10, itemTypes: [ASSIGNED_EVENT]) {
+    nodes {
+      ... on AssignedEvent {
+        createdAt
+        assignee {
+          ... on User {
+            login
+          }
+        }
+      }
+    }
+  }
+}
+
+# Counts only: no card fragments and `first: 1`, so all four searches cost a single
+# rate-limit point. Fetched on every refresh so a tab badge is never a stale zero.
+query DashboardCounts {
+  rateLimit {
+    cost
+    nodeCount
+    remaining
+    resetAt
+  }
+  viewer {
+    login
+  }
+  ownedPullRequests: search(
+    query: "is:open is:pr author:@me user:@me sort:updated-desc"
+    type: ISSUE
+    first: 1
+  ) {
+    issueCount
+  }
+  ownedIssues: search(
+    query: "is:open is:issue author:@me user:@me sort:updated-desc"
+    type: ISSUE
+    first: 1
+  ) {
+    issueCount
+  }
+  contributedPullRequests: search(
+    query: "is:open is:pr author:@me -user:@me sort:updated-desc"
+    type: ISSUE
+    first: 1
+  ) {
+    issueCount
+  }
+  contributedIssues: search(
+    query: "is:open is:issue author:@me -user:@me sort:updated-desc"
+    type: ISSUE
+    first: 1
+  ) {
+    issueCount
+  }
+}
+
+# Pin type-ahead: the repositories this account actually works in, most recently pushed
+# first. Filtering happens locally, so typing costs nothing.
+query ViewerRepositories($first: Int!) {
+  rateLimit {
+    cost
+    nodeCount
+    remaining
+    resetAt
+  }
+  viewer {
+    login
+    repositories(
+      first: $first
+      affiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]
+      isArchived: false
+      orderBy: { field: PUSHED_AT, direction: DESC }
+    ) {
+      nodes {
+        ...PinnableRepository
+      }
+    }
+    repositoriesContributedTo(
+      first: $first
+      contributionTypes: [COMMIT, PULL_REQUEST, PULL_REQUEST_REVIEW, ISSUE]
+      includeUserRepositories: false
+      orderBy: { field: PUSHED_AT, direction: DESC }
+    ) {
+      nodes {
+        ...PinnableRepository
+      }
+    }
+  }
+}
+
+fragment PinnableRepository on Repository {
+  id
+  nameWithOwner
+  url
+  isPrivate
+}

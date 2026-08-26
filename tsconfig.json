@@ -1,0 +1,8 @@
+{
+  "extends": "./.wxt/tsconfig.json",
+  "compilerOptions": {
+    "types": ["vitest/globals", "@testing-library/jest-dom"],
+    "jsx": "react-jsx"
+  },
+  "include": ["src", "tests", "*.config.ts", "codegen.ts", ".wxt/wxt.d.ts"]
+}

@@ -1,0 +1,89 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* GitHub's Primer variables inherit through the shadow host. Mapping to those live values keeps
+   the extension in lockstep with every GitHub colour theme instead of duplicating a palette. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:host {
+  --radius: var(--borderRadius-medium);
+  --background: var(--bgColor-default);
+  --foreground: var(--fgColor-default);
+  --card: var(--bgColor-default);
+  --card-foreground: var(--fgColor-default);
+  --popover: var(--overlay-bgColor);
+  --popover-foreground: var(--fgColor-default);
+  --primary: var(--button-primary-bgColor-rest);
+  --primary-foreground: var(--button-primary-fgColor-rest);
+  --secondary: var(--bgColor-neutral-muted);
+  --secondary-foreground: var(--fgColor-default);
+  --muted: var(--bgColor-muted);
+  --muted-foreground: var(--fgColor-muted);
+  --accent: var(--control-transparent-bgColor-hover);
+  --accent-foreground: var(--fgColor-default);
+  --destructive: var(--fgColor-danger);
+  --border: var(--borderColor-default);
+  --input: var(--control-borderColor-rest);
+  --ring: var(--focus-outlineColor);
+  /* The one brand colour, reserved for the mark's node. Primer has no equivalent. */
+  --brand-accent: #f2622b;
+
+  display: block;
+  font-family: var(
+    --fontStack-sansSerif,
+    "Mona Sans VF",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Noto Sans Backtick Fix",
+    "Noto Sans",
+    Helvetica,
+    Arial,
+    sans-serif,
+    "Apple Color Emoji",
+    "Segoe UI Emoji"
+  );
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--foreground);
+  background: var(--background);
+}
+
+:host([data-theme="dark"]) {
+  --brand-accent: #ff7a45;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  a,
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
