@@ -3,6 +3,8 @@
 Replacement for the GitHub homepage, as a browser extension. It keeps GitHub's own header and
 navigation, and replaces the feed below it with a read-only dashboard of the work waiting on you.
 
+<a href="https://chromewebstore.google.com/detail/octobase/mgipbfmankhlkpeioipbgibidppifnec"><img src="docs/install-chrome.svg" alt="Install Octobase from the Chrome Web Store" width="276" /></a>
+
 ![The attention queue](docs/screenshots/01-attention-light.png)
 
 - Review-requested pull requests across every repository you can reach.
@@ -11,6 +13,8 @@ navigation, and replaces the feed below it with a read-only dashboard of the wor
 - Snapshots cached in IndexedDB, so the dashboard paints before GitHub answers.
 
 ## Install
+
+To build and install locally:
 
 ```sh
 pnpm install

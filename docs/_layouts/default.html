@@ -84,6 +84,63 @@
       a {
         color: var(--link);
       }
+      .install-actions {
+        margin: 1.5rem 0 2rem;
+      }
+      .store-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.8rem;
+        min-width: 17rem;
+        padding: 0.75rem 0.9rem;
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        background: var(--muted-bg);
+        box-shadow: 0 1px 2px rgb(0 0 0 / 8%);
+        color: var(--fg);
+        text-decoration: none;
+        transition:
+          border-color 120ms ease,
+          box-shadow 120ms ease,
+          transform 120ms ease;
+      }
+      .store-button:hover {
+        border-color: var(--brand-accent);
+        box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
+        transform: translateY(-1px);
+      }
+      .store-button:focus-visible {
+        outline: 2px solid var(--link);
+        outline-offset: 3px;
+      }
+      .chrome-icon {
+        position: relative;
+        flex: 0 0 auto;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 50%;
+        background: conic-gradient(from -30deg, #ea4335 0 33.33%, #fbbc04 0 66.66%, #34a853 0);
+      }
+      .chrome-icon span {
+        position: absolute;
+        inset: 0.52rem;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        background: #4285f4;
+      }
+      .store-label {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        line-height: 1.2;
+      }
+      .store-label strong {
+        font-size: 1rem;
+      }
+      .store-eyebrow {
+        color: var(--muted-fg);
+        font-size: 0.72rem;
+      }
       p,
       li {
         color: var(--fg);

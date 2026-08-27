@@ -4,6 +4,19 @@ title: Octobase
 
 # Replacement for the GitHub homepage
 
+Stay on top of review requests, pull requests, assigned issues, and pinned repositories without
+leaving GitHub.
+
+<div class="install-actions">
+  <a class="store-button" href="https://chromewebstore.google.com/detail/octobase/mgipbfmankhlkpeioipbgibidppifnec" aria-label="Install Octobase from the Chrome Web Store">
+    <span class="chrome-icon" aria-hidden="true"><span></span></span>
+    <span class="store-label">
+      <span class="store-eyebrow">Available in the</span>
+      <strong>Chrome Web Store</strong>
+    </span>
+  </a>
+</div>
+
 <picture>
   <source srcset="screenshots/01-attention-dark.png" media="(prefers-color-scheme: dark)" />
   <img src="screenshots/01-attention-light.png" alt="The attention queue" />
