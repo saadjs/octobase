@@ -14,37 +14,41 @@
 - `src/lib/` — message sender, dashboard push broadcast, and shared helpers.
 - `src/gql/` — generated GraphQL artifacts; regenerate rather than hand-edit.
 - `tools/oxlint/anti-slop/` — custom oxlint plugin enforced by `pnpm lint`.
-- `tools/safari/` — Xcode wrapper generation, unsigned build check, and App Store archive for the Safari build.
+- `tools/safari/` — Safari wrapper generation, unsigned build check, and archive/export/notarization for both the App Store and Developer ID (Homebrew) channels.
 - `tests/e2e/` — Playwright end-to-end and performance suite over the built extension.
 
 Stack: WXT, React 19, TypeScript, Tailwind v4, shadcn, TanStack Query, valibot, GitHub GraphQL, IndexedDB, Vitest, Playwright.
 
 <important if="you need to run commands to develop, build, test, lint, format, type-check, or generate GraphQL code">
 
-| Command                                        | What it does                                                              |
-| ---------------------------------------------- | ------------------------------------------------------------------------- |
-| `pnpm dev` / `pnpm dev:chrome`                 | Start the Chrome development build.                                       |
-| `pnpm dev:firefox`                             | Start the Firefox development build.                                      |
-| `pnpm dev:safari`                              | Build the Safari extension into `.output/`.                               |
-| `pnpm dev:all`                                 | Build Safari; start Chrome and Firefox development.                       |
-| `pnpm check`                                   | Format check, lint, type-check, and test.                                 |
-| `pnpm test`                                    | Run all tests once.                                                       |
-| `pnpm vitest run <path>`                       | Run one test file; add `-t "<name>"` for one test.                        |
-| `pnpm test:watch`                              | Vitest in watch mode.                                                     |
-| `pnpm test:coverage`                           | Tests with v8 coverage.                                                   |
-| `pnpm test:e2e` / `test:e2e:ui`                | Playwright e2e against the built Chrome extension.                        |
-| `pnpm size`                                    | Gzip budget gate over `.output/chrome-mv3`.                               |
-| `pnpm lint` / `pnpm lint:fix`                  | oxlint, type-aware, warnings are errors.                                  |
-| `pnpm format` / `format:check`                 | oxfmt write / check.                                                      |
-| `pnpm typecheck`                               | `tsc --noEmit`.                                                           |
-| `pnpm codegen` / `:watch`                      | Regenerate GraphQL types from the local GitHub schema.                    |
-| `pnpm build` / `:firefox` / `:safari` / `:all` | Production builds into `.output/`.                                        |
-| `pnpm zip`                                     | Package a build for store upload.                                         |
-| `pnpm package:safari`                          | Generate the Safari Xcode wrapper into `.output/safari-xcode`.            |
-| `pnpm open:safari`                             | Generate the wrapper and open it in Xcode.                                |
-| `pnpm sync:safari`                             | Rebuild Safari and rsync it into the generated wrapper's resources.       |
-| `pnpm check:safari`                            | Build the generated native wrapper without signing.                       |
-| `pnpm archive:safari`                          | Signed App Store archive; needs `APPLE_TEAM_ID` and `APPLE_BUILD_NUMBER`. |
+| Command                                              | What it does                                                              |
+| ---------------------------------------------------- | ------------------------------------------------------------------------- |
+| `pnpm dev` / `pnpm dev:chrome`                       | Start the Chrome development build.                                       |
+| `pnpm dev:firefox`                                   | Start the Firefox development build.                                      |
+| `pnpm dev:safari`                                    | Build the Safari extension into `.output/`.                               |
+| `pnpm dev:all`                                       | Build Safari; start Chrome and Firefox development.                       |
+| `pnpm check`                                         | Format check, lint, type-check, and test.                                 |
+| `pnpm test`                                          | Run all tests once.                                                       |
+| `pnpm vitest run <path>`                             | Run one test file; add `-t "<name>"` for one test.                        |
+| `pnpm test:watch`                                    | Vitest in watch mode.                                                     |
+| `pnpm test:coverage`                                 | Tests with v8 coverage.                                                   |
+| `pnpm test:e2e` / `test:e2e:ui`                      | Playwright e2e against the built Chrome extension.                        |
+| `pnpm size`                                          | Gzip budget gate over `.output/chrome-mv3`.                               |
+| `pnpm lint` / `pnpm lint:fix`                        | oxlint, type-aware, warnings are errors.                                  |
+| `pnpm format` / `format:check`                       | oxfmt write / check.                                                      |
+| `pnpm typecheck`                                     | `tsc --noEmit`.                                                           |
+| `pnpm codegen` / `:watch`                            | Regenerate GraphQL types from the local GitHub schema.                    |
+| `pnpm build` / `:firefox` / `:safari` / `:all`       | Production builds into `.output/`.                                        |
+| `pnpm zip`                                           | Package a build for store upload.                                         |
+| `pnpm package:safari`                                | Generate the Safari Xcode wrapper into `.output/safari-xcode`.            |
+| `pnpm open:safari`                                   | Generate the wrapper and open it in Xcode.                                |
+| `pnpm sync:safari`                                   | Rebuild Safari and rsync it into the generated wrapper's resources.       |
+| `pnpm check:safari`                                  | Build the generated native wrapper without signing.                       |
+| `pnpm archive:safari`                                | Signed App Store archive; needs `APPLE_TEAM_ID` and `APPLE_BUILD_NUMBER`. |
+| `pnpm package:safari:direct`                         | Generate the Developer ID wrapper into `.output/safari-xcode-direct`.     |
+| `pnpm check:safari:direct` / `archive:safari:direct` | Unsigned build check / signed Developer ID archive of that wrapper.       |
+| `pnpm export:safari` / `notarize:safari`             | Export the Developer ID app; notarize, staple, and zip it for the tap.    |
+| `pnpm release:safari`                                | Archive, export, and notarize the Homebrew build in one run.              |
 
 `pnpm dev` needs no `.env`: `wxt.config.ts` defaults `WXT_GITHUB_CLIENT_ID` and `WXT_GITHUB_APP_SLUG` to the public Octobase GitHub App. Override them in `.env` (see `.env.example`) to target a different App. `pnpm codegen` needs no token.
 </important>

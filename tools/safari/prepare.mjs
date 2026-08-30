@@ -2,15 +2,11 @@ import { execFile } from "node:child_process";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { promisify } from "node:util";
-import { fileURLToPath } from "node:url";
+import { resolveChannel, root } from "./channels.mjs";
 
 const run = promisify(execFile);
-const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const channel = resolveChannel();
 const safariOutput = join(root, ".output", "safari-mv3");
-const xcodeOutput = join(root, ".output", "safari-xcode");
-const projectRoot = join(xcodeOutput, "Octobase");
-const projectFile = join(projectRoot, "Octobase.xcodeproj", "project.pbxproj");
-const appInfo = join(projectRoot, "Octobase", "Info.plist");
 const browserIcon = join(safariOutput, "icon", "light", "128.png");
 const chrome = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const packageJson = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
@@ -18,17 +14,17 @@ const version = packageJson.version;
 
 const originalBrowserIcon = await readFile(browserIcon);
 await renderHighResolutionBrowserIcon();
-await rm(xcodeOutput, { recursive: true, force: true });
+await rm(channel.xcodeOutput, { recursive: true, force: true });
 try {
   await run("xcrun", [
     "safari-web-extension-packager",
     safariOutput,
     "--project-location",
-    xcodeOutput,
+    channel.xcodeOutput,
     "--app-name",
-    "Octobase",
+    channel.appName,
     "--bundle-identifier",
-    "sh.saad.octobase",
+    channel.bundleId,
     "--macos-only",
     "--copy-resources",
     "--no-open",
@@ -38,14 +34,12 @@ try {
 } finally {
   await writeFile(browserIcon, originalBrowserIcon);
 }
-await writeFile(
-  join(projectRoot, "Octobase Extension", "Resources", "icon", "light", "128.png"),
-  originalBrowserIcon,
-);
+await writeFile(join(channel.extensionResources, "icon", "light", "128.png"), originalBrowserIcon);
 await configureProject();
 await configureAppInfo();
 
-process.stdout.write(`Safari Xcode project: ${projectRoot}\n`);
+process.stdout.write(`Safari Xcode project (${channel.name}): ${channel.projectRoot}\n`);
+process.stdout.write(`Bundle identifier: ${channel.bundleId}\n`);
 process.stdout.write(
   `Version: ${version} (build 1; override with APPLE_BUILD_NUMBER when archiving)\n`,
 );
@@ -73,11 +67,18 @@ async function renderHighResolutionBrowserIcon() {
 }
 
 async function configureProject() {
-  let project = await readFile(projectFile, "utf8");
+  let project = await readFile(channel.projectFile, "utf8");
   project = project
+    .replace(
+      /PRODUCT_BUNDLE_IDENTIFIER = ([^;]+);/g,
+      (_match, identifier) =>
+        `PRODUCT_BUNDLE_IDENTIFIER = ${
+          identifier.endsWith(".Extension") ? `${channel.bundleId}.Extension` : channel.bundleId
+        };`,
+    )
     .replaceAll(
-      "PRODUCT_BUNDLE_IDENTIFIER = sh.saad.Octobase;",
-      "PRODUCT_BUNDLE_IDENTIFIER = sh.saad.octobase;",
+      `INFOPLIST_KEY_CFBundleDisplayName = "${channel.appName} Extension";`,
+      `INFOPLIST_KEY_CFBundleDisplayName = "${channel.extensionDisplayName}";`,
     )
     .replace(/CURRENT_PROJECT_VERSION = [^;]+;/g, "CURRENT_PROJECT_VERSION = 1;")
     .replace(/MARKETING_VERSION = [^;]+;/g, `MARKETING_VERSION = ${version};`)
@@ -86,16 +87,16 @@ async function configureProject() {
       'INFOPLIST_KEY_NSHumanReadableCopyright = "";',
       'INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 Saad Bash. All rights reserved.";',
     );
-  await writeFile(projectFile, project);
+  await writeFile(channel.projectFile, project);
 }
 
 async function configureAppInfo() {
-  await run("plutil", ["-insert", "ITSAppUsesNonExemptEncryption", "-bool", "NO", appInfo]);
+  await run("plutil", ["-insert", "ITSAppUsesNonExemptEncryption", "-bool", "NO", channel.appInfo]);
   await run("plutil", [
     "-insert",
     "LSApplicationCategoryType",
     "-string",
     "public.app-category.developer-tools",
-    appInfo,
+    channel.appInfo,
   ]);
 }

@@ -1,18 +1,17 @@
 import { execFile } from "node:child_process";
-import { dirname, join } from "node:path";
 import { promisify } from "node:util";
-import { fileURLToPath } from "node:url";
+import { resolveChannel } from "./channels.mjs";
 
 const run = promisify(execFile);
-const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const channel = resolveChannel();
 
 await run(
   "xcodebuild",
   [
     "-project",
-    join(root, ".output", "safari-xcode", "Octobase", "Octobase.xcodeproj"),
+    channel.xcodeproj,
     "-scheme",
-    "Octobase",
+    channel.appName,
     "-configuration",
     "Release",
     "-destination",
@@ -23,4 +22,4 @@ await run(
   { maxBuffer: 10 * 1024 * 1024 },
 );
 
-process.stdout.write("Safari wrapper builds successfully without signing.\n");
+process.stdout.write(`Safari wrapper (${channel.name}) builds successfully without signing.\n`);
