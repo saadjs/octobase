@@ -15,6 +15,12 @@ leaving GitHub.
       <strong>Chrome Web Store</strong>
     </span>
   </a>
+  <div class="brew-install" aria-label="Install Octobase for Safari with Homebrew">
+    <span class="store-label">
+      <span class="store-eyebrow">Safari via Homebrew</span>
+      <code>brew install --cask saadjs/tap/octobase</code>
+    </span>
+  </div>
 </div>
 
 <picture>

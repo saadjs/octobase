@@ -3,7 +3,7 @@
 Replacement for the GitHub homepage, as a browser extension. It keeps GitHub's own header and
 navigation, and replaces the feed below it with a read-only dashboard of the work waiting on you.
 
-<a href="https://chromewebstore.google.com/detail/octobase/mgipbfmankhlkpeioipbgibidppifnec"><img src="docs/install-chrome.svg" alt="Install Octobase from the Chrome Web Store" width="276" /></a>
+<a href="https://chromewebstore.google.com/detail/octobase/mgipbfmankhlkpeioipbgibidppifnec"><img src="docs/install-chrome.svg" alt="Install Octobase from the Chrome Web Store" width="276" /></a> **Safari:** `brew install --cask saadjs/tap/octobase`
 
 ![The attention queue](docs/screenshots/01-attention-light.png)
 
