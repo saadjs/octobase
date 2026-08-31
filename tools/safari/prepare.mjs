@@ -11,6 +11,7 @@ const browserIcon = join(safariOutput, "icon", "light", "128.png");
 const chrome = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const packageJson = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
 const version = packageJson.version;
+const buildNumber = 2;
 
 const originalBrowserIcon = await readFile(browserIcon);
 await renderHighResolutionBrowserIcon();
@@ -41,7 +42,7 @@ await configureAppInfo();
 process.stdout.write(`Safari Xcode project (${channel.name}): ${channel.projectRoot}\n`);
 process.stdout.write(`Bundle identifier: ${channel.bundleId}\n`);
 process.stdout.write(
-  `Version: ${version} (build 1; override with APPLE_BUILD_NUMBER when archiving)\n`,
+  `Version: ${version} (build ${buildNumber}; override with APPLE_BUILD_NUMBER when archiving)\n`,
 );
 
 async function renderHighResolutionBrowserIcon() {
@@ -80,7 +81,7 @@ async function configureProject() {
       `INFOPLIST_KEY_CFBundleDisplayName = "${channel.appName} Extension";`,
       `INFOPLIST_KEY_CFBundleDisplayName = "${channel.extensionDisplayName}";`,
     )
-    .replace(/CURRENT_PROJECT_VERSION = [^;]+;/g, "CURRENT_PROJECT_VERSION = 1;")
+    .replace(/CURRENT_PROJECT_VERSION = [^;]+;/g, `CURRENT_PROJECT_VERSION = ${buildNumber};`)
     .replace(/MARKETING_VERSION = [^;]+;/g, `MARKETING_VERSION = ${version};`)
     .replace(/MACOSX_DEPLOYMENT_TARGET = [^;]+;/g, "MACOSX_DEPLOYMENT_TARGET = 12.0;")
     .replaceAll(

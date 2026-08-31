@@ -61,7 +61,7 @@ pnpm test:e2e         # Playwright, against the real build output
 Create a signed App Store archive with a new integer build number:
 
 ```sh
-APPLE_TEAM_ID=YOURTEAMID APPLE_BUILD_NUMBER=1 pnpm archive:safari
+APPLE_TEAM_ID=YOURTEAMID APPLE_BUILD_NUMBER=2 pnpm archive:safari
 open .output/safari-archive/Octobase.xcarchive
 ```
 
