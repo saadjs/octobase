@@ -3,7 +3,7 @@ import type { PublicTokenState } from "@/auth/types";
 import { normalizeGitHubLogin } from "@/data/account";
 import type { CachedDashboard } from "@/data/cache";
 import type { DashboardPreferences, DashboardTab } from "@/data/dashboard-preferences";
-import { remainingDashboardFreshMs } from "@/data/dashboard-freshness";
+import { dashboardTabFetchedAt, remainingDashboardFreshMs } from "@/data/dashboard-freshness";
 import type { DashboardSnapshot } from "@/data/github";
 import type { RepositoryAccess } from "@/data/repository-access";
 import type { PinnableRepository } from "@/data/viewer-repositories";
@@ -143,7 +143,11 @@ export function dashboardQueryOptions(
         fetched,
       );
     },
-    staleTime: (query) => remainingDashboardFreshMs(query.state.data?.dashboard?.fetchedAt),
+    staleTime: (query) => {
+      const dashboard = query.state.data?.dashboard;
+      const fetchedAt = dashboard && dashboardTabFetchedAt(dashboard, tab);
+      return dashboard && !fetchedAt ? 0 : remainingDashboardFreshMs(fetchedAt);
+    },
     refetchOnWindowFocus: true,
     // Switching to a never-before-selected tab keeps showing whatever was on screen (the
     // background always returns the whole merged snapshot, so an older tab's data is still a

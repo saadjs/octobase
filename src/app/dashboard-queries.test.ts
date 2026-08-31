@@ -67,16 +67,21 @@ describe("dashboard query definitions", () => {
     });
   });
 
-  it("derives staleTime from the snapshot's own fetchedAt, not a fresh window on receipt", async () => {
-    // The background already served this near the end of its own 5-minute freshness window, so
-    // the client's remaining staleTime must be the leftover ~1 minute, not another fresh 5.
-    const fetchedAt = new Date(Date.now() - 4 * 60_000).toISOString();
-    const snapshot = { data: dashboardSnapshot(), fetchedAt };
+  it("derives staleTime from the selected tab rather than the latest snapshot write", async () => {
+    // Attention was just refreshed, but the preserved owned rows are near the end of their own
+    // freshness window. The owned query must retain only its remaining ~1 minute.
+    const fetchedAt = new Date().toISOString();
+    const ownedFetchedAt = new Date(Date.now() - 4 * 60_000).toISOString();
+    const snapshot = {
+      data: dashboardSnapshot(),
+      fetchedAt,
+      fetchedAtByTab: { attention: fetchedAt, owned: ownedFetchedAt },
+    };
     const isolatedSendMessage = vi.fn<(request: OctobaseRequest) => Promise<OctobaseResponse>>();
     isolatedSendMessage.mockResolvedValue({ kind: "dashboard", snapshot, stale: false });
 
     const queryClient = new QueryClient();
-    const options = () => dashboardQueryOptions("OctoCat", "attention", isolatedSendMessage);
+    const options = () => dashboardQueryOptions("OctoCat", "owned", isolatedSendMessage);
     await queryClient.fetchQuery(options());
     expect(isolatedSendMessage).toHaveBeenCalledTimes(1);
 

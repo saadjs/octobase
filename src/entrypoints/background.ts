@@ -278,7 +278,7 @@ async function handleMessage(
           isDashboardForAccount(cacheFirst.data, message.accountLogin) &&
           isDashboardTabLoaded(cacheFirst.data, message.selectedTab)
         ) {
-          const stale = !isDashboardCacheFresh(cacheFirst);
+          const stale = !isDashboardCacheFresh(cacheFirst, message.selectedTab);
           if (stale) {
             void runBackgroundTask("refreshing the stale dashboard", async () => {
               await dashboardRefresh.run(message.accountLogin, {

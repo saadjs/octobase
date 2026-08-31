@@ -57,7 +57,10 @@ export interface DashboardRefreshSource {
 
 export interface DashboardRefreshSnapshots {
   read(accountLogin: string): Promise<CachedDashboard<DashboardSnapshot> | undefined>;
-  write(data: DashboardSnapshot): Promise<CachedDashboard<DashboardSnapshot>>;
+  write(
+    data: DashboardSnapshot,
+    refreshedTabs?: readonly DashboardTab[],
+  ): Promise<CachedDashboard<DashboardSnapshot>>;
   clear(accountLogin: string): Promise<void>;
 }
 
@@ -132,7 +135,7 @@ export class DashboardRefresh {
       const fetched = await this.fetchDashboard(accountLogin, accessToken);
       this.assertAccount(fetched.data, accountLogin);
       await this.tokens.set(fetched.data.viewer.login, accessToken, metadata);
-      const snapshot = await this.snapshots.write(fetched.data);
+      const snapshot = await this.snapshots.write(fetched.data, ["attention"]);
       this.finishCounts(accountLogin, "attention", fetched.counting, snapshot);
     });
   }
@@ -198,7 +201,12 @@ export class DashboardRefresh {
         if (connectedToken?.accessToken !== selection.token.accessToken) return undefined;
       }
 
-      const snapshot = await this.snapshots.write(data);
+      const refreshedTabs = fetched
+        ? selectedTab === "attention"
+          ? (["attention"] as const)
+          : (["attention", selectedTab] as const)
+        : undefined;
+      const snapshot = await this.snapshots.write(data, refreshedTabs);
       await this.publisher.publish(snapshot);
       if (fetched) this.finishCounts(accountLogin, selectedTab, fetched.counting, snapshot);
       return snapshot;

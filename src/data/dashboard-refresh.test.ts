@@ -26,6 +26,7 @@ describe("DashboardRefresh", () => {
       ownedIssues: connection([issueNode({ id: "fresh-owned" })]),
     });
     let written: DashboardSnapshot | undefined;
+    let refreshedTabs: readonly string[] | undefined;
     const tokens: DashboardRefreshTokens = {
       get: vi.fn<DashboardRefreshTokens["get"]>(async () => token),
       getLegacy: vi.fn<DashboardRefreshTokens["getLegacy"]>(async () => undefined),
@@ -44,8 +45,9 @@ describe("DashboardRefresh", () => {
     };
     const snapshots: DashboardRefreshSnapshots = {
       read: vi.fn<DashboardRefreshSnapshots["read"]>(async () => cachedSnapshot(cached)),
-      write: vi.fn<DashboardRefreshSnapshots["write"]>(async (data) => {
+      write: vi.fn<DashboardRefreshSnapshots["write"]>(async (data, tabs) => {
         written = data;
+        refreshedTabs = tabs;
         return cachedSnapshot(data);
       }),
       clear: vi.fn<DashboardRefreshSnapshots["clear"]>(async () => undefined),
@@ -65,6 +67,7 @@ describe("DashboardRefresh", () => {
     expect(written?.ownedIssues.nodes?.[0]?.id).toBe("fresh-owned");
     expect(written?.contributedPullRequests.nodes?.[0]?.id).toBe("preserved-contribution");
     expect(result?.data).toBe(written);
+    expect(refreshedTabs).toEqual(["attention", "owned"]);
     expect(publish).toHaveBeenCalledWith(result);
   });
 
@@ -119,6 +122,7 @@ describe("DashboardRefresh", () => {
   it("returns attention before slower badge counts and publishes them afterward", async () => {
     const counting = Promise.withResolvers<DashboardCountsQuery | undefined>();
     const writes: DashboardSnapshot[] = [];
+    const refreshedTabs: (readonly string[] | undefined)[] = [];
     const tokens: DashboardRefreshTokens = {
       get: vi.fn<DashboardRefreshTokens["get"]>(async () => token),
       getLegacy: vi.fn<DashboardRefreshTokens["getLegacy"]>(async () => undefined),
@@ -139,8 +143,9 @@ describe("DashboardRefresh", () => {
       read: vi.fn<DashboardRefreshSnapshots["read"]>(async () =>
         writes.length > 0 ? cachedSnapshot(writes.at(-1) ?? dashboardSnapshot()) : undefined,
       ),
-      write: vi.fn<DashboardRefreshSnapshots["write"]>(async (data) => {
+      write: vi.fn<DashboardRefreshSnapshots["write"]>(async (data, tabs) => {
         writes.push(data);
+        refreshedTabs.push(tabs);
         return cachedSnapshot(data);
       }),
       clear: vi.fn<DashboardRefreshSnapshots["clear"]>(async () => undefined),
@@ -174,6 +179,7 @@ describe("DashboardRefresh", () => {
       contributedPullRequests: 1,
       contributedIssues: 0,
     });
+    expect(refreshedTabs).toEqual([["attention"], undefined]);
     expect(publish).toHaveBeenCalledTimes(2);
   });
 

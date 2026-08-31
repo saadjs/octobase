@@ -20,6 +20,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { dashboardTabFetchedAt } from "@/data/dashboard-freshness";
+import type { DashboardTab } from "@/data/dashboard-preferences";
 
 interface AppProps {
   accountLogin: string;
@@ -74,7 +76,7 @@ function DashboardApp({ accountLogin, sendMessage }: AppProps) {
     <main className="mt-16 min-h-[calc(100vh-4rem)] w-full bg-background">
       <div className="mx-auto w-full max-w-[110rem] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 2xl:px-12">
         <header className="flex min-h-10 items-center justify-between gap-3">
-          <DashboardHeading dashboard={dashboard} />
+          <DashboardHeading dashboard={dashboard} selectedTab={preferences.selectedTab} />
           {connection === "connected" ? (
             <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
               {isConfirmingDisconnect ? (
@@ -221,16 +223,21 @@ function DashboardApp({ accountLogin, sendMessage }: AppProps) {
 
 function DashboardHeading({
   dashboard,
+  selectedTab,
 }: {
   dashboard: ReturnType<typeof useDashboardController>["dashboard"];
+  selectedTab: DashboardTab;
 }) {
+  const updatedAt = dashboard
+    ? (dashboardTabFetchedAt(dashboard, selectedTab) ?? dashboard.fetchedAt)
+    : undefined;
   return (
     <div className="flex min-w-0 items-center gap-2.5">
       <BrandMark className="size-7 shrink-0 text-muted-foreground" />
       <div className="min-w-0">
         {/* The mark carries the identity now, so the landmark heading is for screen readers. */}
         <h1 className="sr-only">Your work</h1>
-        {dashboard ? (
+        {dashboard && updatedAt ? (
           <p className="truncate text-xs text-muted-foreground sm:text-sm">
             <a
               className="hover:text-(--fgColor-accent) hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-(--focus-outlineColor)"
@@ -243,10 +250,10 @@ function DashboardHeading({
             {dashboard.data.viewer.name ? ` (${dashboard.data.viewer.name})` : ""} · Updated{" "}
             <time
               className="cursor-help underline decoration-dotted underline-offset-2"
-              dateTime={dashboard.fetchedAt}
-              title={`${dashboard.stale ? "Refreshing" : "Last refreshed"}: ${formatExactTime(dashboard.fetchedAt)}`}
+              dateTime={updatedAt}
+              title={`${dashboard.stale ? "Refreshing" : "Last refreshed"}: ${formatExactTime(updatedAt)}`}
             >
-              {formatRelativeTime(dashboard.fetchedAt)}
+              {formatRelativeTime(updatedAt)}
             </time>
           </p>
         ) : (

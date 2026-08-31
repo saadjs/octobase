@@ -1,4 +1,5 @@
 import type { CachedDashboard } from "@/data/cache";
+import type { DashboardTab } from "@/data/dashboard-preferences";
 import type { DashboardSnapshot } from "@/data/github";
 
 /** Avoid a duplicate network refresh when Turbo remounts a just-loaded dashboard. */
@@ -6,11 +7,19 @@ export const DASHBOARD_FRESH_FOR_MS = 5 * 60_000;
 
 export function isDashboardCacheFresh(
   snapshot: CachedDashboard<DashboardSnapshot> | undefined,
+  tab: DashboardTab,
   now = Date.now(),
 ): boolean {
   if (!snapshot) return false;
-  const fetchedAt = new Date(snapshot.fetchedAt).getTime();
+  const fetchedAt = new Date(dashboardTabFetchedAt(snapshot, tab) ?? "").getTime();
   return Number.isFinite(fetchedAt) && now - fetchedAt < DASHBOARD_FRESH_FOR_MS;
+}
+
+export function dashboardTabFetchedAt(
+  snapshot: CachedDashboard<DashboardSnapshot>,
+  tab: DashboardTab,
+): string | undefined {
+  return snapshot.fetchedAtByTab?.[tab];
 }
 
 /** The client's cache window must be what's left of the background's, not a fresh 5 minutes on top. */

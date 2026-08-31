@@ -1,10 +1,14 @@
 import { openDB, type DBSchema } from "idb";
 import { normalizeGitHubLogin } from "@/data/account";
+import type { DashboardTab } from "@/data/dashboard-preferences";
 import type { DashboardSnapshot } from "@/data/github";
 
 export interface CachedDashboard<T> {
   data: T;
+  /** Revision time used to order cache writes and pushes. */
   fetchedAt: string;
+  /** Network freshness is independent because work tabs are fetched lazily. */
+  fetchedAtByTab?: Partial<Record<DashboardTab, string>>;
 }
 
 interface OctobaseDatabase extends DBSchema {
@@ -14,7 +18,7 @@ interface OctobaseDatabase extends DBSchema {
   };
 }
 
-const database = openDB<OctobaseDatabase>("octobase", 5, {
+const database = openDB<OctobaseDatabase>("octobase", 6, {
   upgrade(db, oldVersion, _newVersion, transaction) {
     if (oldVersion === 0) {
       db.createObjectStore("dashboard");
@@ -22,7 +26,8 @@ const database = openDB<OctobaseDatabase>("octobase", 5, {
     }
 
     // Dashboard snapshots are disposable API caches. Clear older shapes on upgrades: v1 used one
-    // global entry, v4 added reaction groups to every card, and v5 adds incoming pull requests.
+    // global entry, v4 added reaction groups, v5 added incoming pull requests, and v6 tracks
+    // freshness per lazy tab instead of allowing one tab to make preserved rows look fresh.
     void transaction.objectStore("dashboard").clear();
   },
 });
@@ -35,12 +40,16 @@ export async function readDashboardCache(
 
 export async function writeDashboardCache(
   data: DashboardSnapshot,
+  refreshedTabs: readonly DashboardTab[] = [],
 ): Promise<CachedDashboard<DashboardSnapshot>> {
-  const snapshot: CachedDashboard<DashboardSnapshot> = {
-    data,
-    fetchedAt: new Date().toISOString(),
-  };
-  await (await database).put("dashboard", snapshot, normalizeGitHubLogin(data.viewer.login));
+  const db = await database;
+  const key = normalizeGitHubLogin(data.viewer.login);
+  const previous = await db.get("dashboard", key);
+  const fetchedAt = new Date().toISOString();
+  const fetchedAtByTab = { ...previous?.fetchedAtByTab };
+  for (const tab of refreshedTabs) fetchedAtByTab[tab] = fetchedAt;
+  const snapshot: CachedDashboard<DashboardSnapshot> = { data, fetchedAt, fetchedAtByTab };
+  await db.put("dashboard", snapshot, key);
   return snapshot;
 }
 

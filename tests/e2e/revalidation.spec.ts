@@ -3,7 +3,7 @@ import { DASHBOARD_FRESH_FOR_MS } from "../../src/data/dashboard-freshness";
 import { E2E_LOGIN } from "./fixtures/dashboard-data";
 import { expect, test } from "./fixtures/extension";
 
-/** Rewrites the background's cached fetchedAt directly so a stale cache never needs a real wait. */
+/** Rewrites the background's attention timestamps so a stale cache never needs a real wait. */
 async function ageDashboardCache(
   serviceWorker: Worker,
   login: string,
@@ -22,20 +22,32 @@ async function ageDashboardCache(
         request.addEventListener("success", () => resolve(request.result));
         request.addEventListener("error", () => reject(request.error));
       });
-      const existing = await new Promise<{ data: unknown; fetchedAt: string } | undefined>(
-        (resolve, reject) => {
-          const getRequest = db
-            .transaction("dashboard", "readonly")
-            .objectStore("dashboard")
-            .get(seededLogin);
-          getRequest.addEventListener("success", () => resolve(getRequest.result));
-          getRequest.addEventListener("error", () => reject(getRequest.error));
-        },
-      );
+      const existing = await new Promise<
+        | {
+            data: unknown;
+            fetchedAt: string;
+            fetchedAtByTab?: { attention?: string };
+          }
+        | undefined
+      >((resolve, reject) => {
+        const getRequest = db
+          .transaction("dashboard", "readonly")
+          .objectStore("dashboard")
+          .get(seededLogin);
+        getRequest.addEventListener("success", () => resolve(getRequest.result));
+        getRequest.addEventListener("error", () => reject(getRequest.error));
+      });
       if (!existing) throw new Error(`No cached dashboard for ${seededLogin} to age.`);
       await new Promise<void>((resolve, reject) => {
         const tx = db.transaction("dashboard", "readwrite");
-        tx.objectStore("dashboard").put({ ...existing, fetchedAt: seededFetchedAt }, seededLogin);
+        tx.objectStore("dashboard").put(
+          {
+            ...existing,
+            fetchedAt: seededFetchedAt,
+            fetchedAtByTab: { ...existing.fetchedAtByTab, attention: seededFetchedAt },
+          },
+          seededLogin,
+        );
         tx.addEventListener("complete", () => resolve());
         tx.addEventListener("error", () => reject(tx.error));
       });

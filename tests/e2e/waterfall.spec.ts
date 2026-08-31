@@ -38,18 +38,22 @@ async function ageCachedSnapshot(serviceWorker: Worker, ageMs: number): Promise<
   await serviceWorker.evaluate(
     async ([login, age]: [string, number]) => {
       const db = await new Promise<IDBDatabase>((resolve, reject) => {
-        const request = indexedDB.open("octobase", 5);
+        const request = indexedDB.open("octobase");
         request.addEventListener("success", () => resolve(request.result));
         request.addEventListener("error", () => reject(request.error));
       });
       const transaction = db.transaction("dashboard", "readwrite");
       const store = transaction.objectStore("dashboard");
-      const current = await new Promise<{ fetchedAt: string } | undefined>((resolve) => {
+      const current = await new Promise<
+        { fetchedAt: string; fetchedAtByTab?: { attention?: string } } | undefined
+      >((resolve) => {
         const request = store.get(login);
         request.onsuccess = () => resolve(request.result);
       });
       if (current) {
-        current.fetchedAt = new Date(Date.now() - age).toISOString();
+        const fetchedAt = new Date(Date.now() - age).toISOString();
+        current.fetchedAt = fetchedAt;
+        current.fetchedAtByTab = { ...current.fetchedAtByTab, attention: fetchedAt };
         store.put(current, login);
       }
       await new Promise((resolve) => {
